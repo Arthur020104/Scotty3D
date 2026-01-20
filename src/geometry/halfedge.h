@@ -35,6 +35,7 @@ public:
 	 * A Halfedge_Mesh is comprised of four atomic element types:
 	 * vertices, edges, faces, and halfedges.
 	 */
+  
 	class Vertex;
 	class Edge;
 	class Face;
@@ -475,6 +476,41 @@ public:
 	//helper for when you have an element reference and want a const element reference:
 	static ElementCRef const_from(ElementRef elem);
 
+HalfedgeRef getPrev(HalfedgeRef f)
+{
+  HalfedgeRef h = f->next;
+  while(h->next != f  && h->id < 10000000)
+    h = h->next;
+  
+  return h;
+}
+void updateCurrentNextAndPrevVertex(HalfedgeRef h, VertexRef o1, VertexRef o2, VertexRef n, std::set<EdgeRef> &ref)
+{
+  HalfedgeRef hp = getPrev(h);
+  if(hp->vertex == o1 || hp->vertex == o2)
+  {
+    hp->vertex = n;
+    n->halfedge = hp;
+    ref.emplace(hp->edge);
+  }
+    
+  
+  if(h->next->vertex == o1 || h->next->vertex == o2)
+  {
+    h->next->vertex = n;
+    ref.emplace(h->next->edge);
+    n->halfedge = h->next;
+  }
+    
+  
+  if(h->vertex == o1 || h->vertex == o2)
+  {
+    h->vertex = n;
+    ref.emplace(h->edge);
+    n->halfedge = h;
+  }
+    
+}
 private:
 	
 	//a fresh element id; assigned + incremented by emplace_*() functions:
